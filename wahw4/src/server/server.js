@@ -155,18 +155,20 @@ app.get('/api/posts', async (req, res) => {
 });
 
 // Get single post by ID
-app.get('/api/posts/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const result = await pool.query('SELECT * FROM posts WHERE id = $1', [id]);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Post not found' });
-        }
-        res.json(result.rows[0]);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+// Get single post by ID
+app.get('/api/posts/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('SELECT * FROM posts WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Post not found' });
     }
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
+
 
 // Create new post (requires authentication)
 app.post('/api/posts', authMiddleware, async (req, res) => {

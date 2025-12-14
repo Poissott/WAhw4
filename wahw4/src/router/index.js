@@ -5,6 +5,7 @@ const auth = require('../server/auth.js');
 import LoginView from '../components/Login.vue'
 import SignUpView from '../components/SignUp.vue'
 import AddPost from '../views/AddPost.vue';
+import PostDetail from '../views/PostDetail.vue';
 
 const routes = [
   {
@@ -43,6 +44,16 @@ const routes = [
       let auth = await (await import('../server/auth.js')).default;
       let authResult = await auth.authenticated();
       if (!authResult) next('/login');
+      else next();
+    }
+  },
+  {
+    path: '/posts/:id',
+    name: 'postDetail',
+    component: PostDetail,
+    beforeEnter: async (to, from, next) => {
+      let authModule = (await import('../server/auth.js')).default;
+      if (!(await authModule.authenticated())) next('/login')
       else next();
     }
   }

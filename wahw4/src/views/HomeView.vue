@@ -1,7 +1,8 @@
 <template>
   <div class="home">
-    <p>Welcome to the Home Page!</p>
-   <!-- Action buttons -->
+    <h1>Welcome to the Home Page!</h1>
+
+    <!-- Action Buttons -->
     <div v-if="authResult" class="buttons">
       <button @click="$router.push('/add-post')">Add Post</button>
       <button @click="deleteAllPosts">Delete All Posts</button>
@@ -9,11 +10,11 @@
     </div>
 
     <!-- Posts List -->
-    <div v-if="posts.length > 0" class="posts-list">
+    <div v-if="posts.length">
       <h2>All Posts</h2>
       <ul>
         <li v-for="post in posts" :key="post.id">
-          <router-link :to="`/post/${post.id}`">
+          <router-link :to="`/posts/${post.id}`">
             {{ post.body }} <small>({{ formatDate(post.date) }})</small>
           </router-link>
         </li>
@@ -36,22 +37,24 @@ export default {
     };
   },
   async mounted() {
-    const auth = (await import('../server/auth.js')).default;
-    this.authResult = await auth.authenticated();
+    const authModule = (await import('../server/auth.js')).default;
+    this.authResult = await authModule.authenticated();
 
     if (this.authResult) {
       this.fetchPosts();
+    } else {
+      this.$router.push('/login');
     }
   },
   methods: {
     async fetchPosts() {
       try {
-        const response = await fetch("http://localhost:3000/api/posts", {
+        const res = await fetch("http://localhost:3000/api/posts", {
           credentials: 'include'
         });
-        this.posts = await response.json();
-      } catch (error) {
-        console.error("Error fetching posts:", error);
+        this.posts = await res.json();
+      } catch (err) {
+        console.error("Error fetching posts:", err);
       }
     },
     async deleteAllPosts() {
@@ -62,25 +65,22 @@ export default {
           method: "DELETE",
           credentials: 'include'
         });
-        this.posts = []; // Clear local posts list
-      } catch (error) {
-        console.error("Error deleting posts:", error);
+        this.posts = [];
+      } catch (err) {
+        console.error("Error deleting posts:", err);
       }
     },
     Logout() {
       fetch("http://localhost:3000/auth/logout", {
         method: "POST",
         credentials: 'include'
-      })
-        .then(() => {
-          console.log('Logged out');
-          location.assign("/login");
-        })
-        .catch(() => console.log("Error logging out"));
+      }).then(() => {
+        this.authResult = false;
+        this.$router.push('/login');
+      }).catch(() => console.log("Error logging out"));
     },
     formatDate(dateStr) {
-      const d = new Date(dateStr);
-      return d.toLocaleString();
+      return new Date(dateStr).toLocaleString();
     }
   }
 };
@@ -89,7 +89,7 @@ export default {
 <style scoped>
 .home {
   max-width: 800px;
-  margin: auto;
+  margin: 40px auto;
   padding: 20px;
 }
 
@@ -111,24 +111,24 @@ export default {
   opacity: 0.9;
 }
 
-.posts-list ul {
-  list-style-type: none;
+ul {
+  list-style: none;
   padding: 0;
 }
 
-.posts-list li {
+li {
   padding: 10px;
   margin-bottom: 5px;
   background: #f5f5f5;
   border-radius: 4px;
 }
 
-.posts-list li a {
+li a {
   text-decoration: none;
   color: #333;
 }
 
-.posts-list li a:hover {
+li a:hover {
   text-decoration: underline;
 }
 </style>
