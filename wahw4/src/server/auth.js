@@ -1,4 +1,4 @@
-export default {
+module.exports = {
     user: { authenticated: false },
     authenticated: async function() {
         try {

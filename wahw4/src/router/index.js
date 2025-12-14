@@ -1,9 +1,10 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import ContactsView from '../views/ContactsView.vue'
-import auth from '../server/auth.js'
+const auth = require('../server/auth.js');
 import LoginView from '../components/Login.vue'
 import SignUpView from '../components/SignUp.vue'
+import AddPost from '../views/AddPost.vue';
 
 const routes = [
   {
@@ -33,6 +34,17 @@ const routes = [
     path: '/signup',
     name: 'signup',
     component: SignUpView
+  },
+   {
+    path: '/add-post',
+    name: 'add-post',
+    component: AddPost,
+    beforeEnter: async (to, from, next) => {
+      let auth = await (await import('../server/auth.js')).default;
+      let authResult = await auth.authenticated();
+      if (!authResult) next('/login');
+      else next();
+    }
   }
 ]
 
