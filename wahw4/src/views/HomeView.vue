@@ -1,18 +1,27 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <p>Welcome to the Home Page!</p>
+    <button v-if = "authResult" @click="Logout" class="center">Logout</button>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
 export default {
   name: 'HomeView',
-  components: {
-    HelloWorld
+  methods: {
+    Logout() {
+      fetch("http://localhost:3000/auth/logout", {
+        credentials: 'include'
+      })
+        .then((response) => response.json())
+        .then(() => {
+          console.log('jwt removed');
+          location.assign("/");
+        })
+        .catch(() => {
+          console.log("error logout");
+        });
+    }
   }
 }
 </script>
